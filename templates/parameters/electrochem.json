@@ -1,0 +1,8 @@
+{
+    "kinetics": {"Tafel_slope": {"value": [0.04, 0.12], "units": "V/dec"},
+                "i_exchange": {"value": 1.2, "units": "A/m^2"}},
+                
+    "paramters": {"resistance": {"value": 1e-1, "units": "Ohm/m^2"},
+                "Cdl": {"value": [1.0, 1.0], "units": "F/m^2"}, 
+                "Erev": {"value": 1.23, "units": "V"}}
+}

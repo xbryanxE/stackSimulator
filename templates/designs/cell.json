@@ -1,0 +1,12 @@
+{
+    "flow_channels": {
+        "n": {"value": 10, "units": ""},
+        "length": {"value": 1.2, "units": "m"},
+        "geometry": {"type": "circular", "names": ["ciruclar", "square"]}
+    },
+
+    "default": {
+        "length": {"value": 1.2, "units": "m"},
+        "geometry": {"type": "circular", "names": ["ciruclar", "square"]}
+    }
+}

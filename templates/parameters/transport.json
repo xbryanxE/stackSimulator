@@ -1,0 +1,4 @@
+{
+    "roughness_factor": {"value": 1e-6, "units": "m"},
+    "minor_losses_factor": {"value": 9.8, "units": ""}
+}

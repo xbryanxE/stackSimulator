@@ -1,0 +1,47 @@
+{
+    "conditions": {"p_out": {"value": 1.1e5, "units": "Pa"}, 
+                   "T": {"value": 363.15, "units": "K"},
+                   "Q_in": {"value": 0.008, "units": "m^3/s"},
+                   "j_load": {"value": 3000, "units": "A/m^2"}},
+
+    "liquid": {"rho": {"value": 1250, "units": "Pa*s"}, 
+               "mu": {"value": 1e-3, "units": "Pa*s"}, 
+               "sigma": {"value": 150, "units": "S/m"}},
+    
+    "gas": [{"mu": {"value": 2.0900321E-5, "units": "Pa*s"},
+            "Mw": {"value": 32e-3, "units": "kg/mol"}, "name": "o2"},
+            {"mu": {"value": 8.9969561E-6, "units": "Pa*s"},
+            "Mw": {"value": 2e-3, "units": "kg/mol"}, "name": "h2"}],
+
+    "electrochem": {"j_load": {"value": 1e4, "units": "A/m^2"},
+                    "Erev": {"value": 1.2, "units": "V"},
+                    "Rc": {"value": 8.9e-5, "units": "Ohm/m^2"},
+                    "ne": {"value": [4, 2], "units": "",
+                    "reaction": ["anodic", "cathodic"]}},
+
+    "kinetics": {"Tafel_slope": {"value": [0.04, 0.12], "units": "V"},
+                 "j_exchange": {"value": 1.2, "units": "A/m^2"}},
+
+    "cell": {"length": {"value": 5e-3, "units": "m"},
+             "height": {"value": 1.2, "units": "m"},
+             "As": {"value": 1.13, "units": "m^2"},
+             "internal_flow_channels": {"value": 10, "units": ""},
+             "obstruction_factor": {"value": 0, "units": ""}},
+
+    "manifold": [{"diameter": {"value": 4e-2, "units": "m"}, "outlet": 0, "side": "shared"},
+                 {"diameter": {"value": 4.4e-2, "units": "m"}, "outlet": 1, "side": "anodic"},
+                 {"diameter": {"value": 4.5e-2, "units": "m"}, "outlet": 1, "side": "cathodic"}],
+
+    "channel": [{"diameter": {"value": 2e-3, "units": "m"}, "length": {"value": 5e-3, "units": "m"}, "outlet": 0, "side": "anodic"},
+                {"diameter": {"value": 2e-3, "units": "m"}, "length": {"value": 5e-3, "units": "m"}, "outlet": 0, "side": "cathodic"},
+                {"diameter": {"value": 2.4e-3, "units": "m"}, "length": {"value": 5e-3, "units": "m"}, "outlet": 1, "side": "anodic"},
+                {"diameter": {"value": 2.5e-3, "units": "m"}, "length": {"value": 5e-3, "units": "m"}, "outlet": 1, "side": "cathodic"}],
+
+    "settings": {"outflow": {"type": "forward", "names": ["forward", "backward"]},
+                 "n_manifolds": {"value": 3, "units": ""},
+                 "N": {"value": 300, "units": ""},
+                 "roughness_factor": {"value": 1e-6, "units": "m"},
+                 "minor_losses_factor": {"value": 9.8, "units": ""}},
+    
+    "error_params": {"tol": 1e-4, "h": 0.7, "max_iter": 1000}
+}

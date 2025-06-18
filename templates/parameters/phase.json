@@ -1,0 +1,9 @@
+{
+    "liquid": {
+        "rho": {"value": 1.2515e+03, "units": "kg/m^3"},
+        "mu": {"value": 7.8419e-04, "units": "Pa*s"},
+        "sigma": {"value": 153.0322, "units": "S/m"}
+    },
+    "gas": {"rho": {"value": [[], []], "units": "kg/m^3"},
+            "mu": {"value": [2.0900321E-5, 8.9969561E-6]}, "units": "Pa*s"}
+}

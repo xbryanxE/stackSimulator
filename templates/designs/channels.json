@@ -1,0 +1,22 @@
+{
+    "default": {
+        "length": {"value": 0.01, "units": "m"},
+        "diameter": {"value": 5e-3, "units": "m"}
+    },
+    "Qi_et_al": {
+        "length": {"value": 0.03, "units": "m"},
+        "diameter": {"value": 7.3e-3, "units": "m"}
+    },
+    "lurgi_inlet": {
+        "length": {"value": 5e-3, "units": "m"},
+        "diameter": {"value": 2e-3, "units": "m"}
+    },
+    "lurgi_o2": {
+        "length": {"value": 5e-3, "units": "m"},
+        "diameter": {"value": 2.4e-3, "units": "m"}
+    },
+    "lurgi_h2": {
+        "length": {"value": 5e-3, "units": "m"},
+        "diameter": {"value": 2.5e-3, "units": "m"}
+    }
+}
