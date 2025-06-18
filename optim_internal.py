@@ -20,8 +20,8 @@ from stackSimulator import *
 class stack_opt_problem(ElementwiseProblem):
     def __init__(self, **kwargs):
         # alpha_tau, alpha_w, alpha_m, alpha_ch, alpha_L, c_ml, c_mk, c_chl, c_chk, c_L, Ref
-        self.parameters = {"alpha_w": [], "alpha_m": [], "alpha_ch": [], "alpha_L": [],
-                           "c_ml": [], "c_mk": [], "c_chl": [], "c_chk": [], "c_L": [], "Ref": []}
+        self.parameters = {"alpha_tau": [], "alpha_w": [], "alpha_m": [], "alpha_ch": [], "alpha_L": [],
+                           "c_ml": [], "c_mk": [], "c_chl": [], "c_chk": [], "Ref": []}
         # rho electrolyte
         self.p_op = 5 * 1e5 # Pa
         self.rho_w = 1250 # kg/m^3
@@ -197,28 +197,14 @@ class stack_opt_problem(ElementwiseProblem):
 
 if __name__=="__main__":
     problem = stack_opt_problem()
-    algorithm = PSO(pop_size=175, sampling=LHS())
-    
-    # algorithm = GA(pop_size=100, sampling=LHS(), 
-    #                selection=RandomSelection(),
-    #                mutation=PolynomialMutation(prob=0.9, eta=20),
-    #                crossover=SBX(prob=0.9, eta=20),
-    #                eliminate_duplicates=True)
-    res = minimize(problem, algorithm, termination=("n_gen", 200), seed=0, verbose=True)
+    algorithm = PSO(pop_size=200, sampling=LHS())
+    res = minimize(problem, algorithm, termination=("n_gen", 300), seed=0, verbose=True)
     print("elapsed time: ", res.exec_time)
     # save results to excel file
-    for key, value in zip(problem.channels_parameters.keys(), res.X[0:9]):
-        problem.channels_parameters[key].append(value)
-    df = pd.DataFrame(problem.channels_parameters)
-    df.to_excel("internal_optim_params/channels_parameters.xlsx", index=False)
-    for key, value in zip(problem.manifolds_parameters.keys(), res.X[9:15]):
-        problem.manifolds_parameters[key].append(value)
-    df = pd.DataFrame(problem.manifolds_parameters)
-    df.to_excel("internal_optim_params/manifolds_parameters.xlsx", index=False)
-    for key, value in zip(problem.cell_parameters.keys(), res.X[15:18]):
-        problem.cell_parameters[key].append(value)
-    df = pd.DataFrame(problem.cell_parameters)
-    df.to_excel("internal_optim_params/cell_parameters.xlsx", index=False)
+    for key, value in zip(problem.parameters.keys(), res.X):
+        problem.parameters[key].append(value)
+    df = pd.DataFrame(problem.parameters)
+    df.to_csv("internal_optim_params/params_I_5bar.csv", sep=",", index=False)
     # save hystorical
     history_df = pd.DataFrame(res.history)
-    history_df.to_excel("internal_optim_params/history.xlsx", index=False)
+    history_df.to_csv("internal_optim_params/history_I_5bar.csv", sep=",", index=False)
