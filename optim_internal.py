@@ -1,4 +1,4 @@
-from pymoo.algorithms.soo.nonconvex.ga import GA
+from pymoo.core.problem import StarmapParallelization
 from pymoo.algorithms.soo.nonconvex.pso import PSO
 from pymoo.operators.sampling.lhs import LHS
 from pymoo.operators.selection.rnd import RandomSelection
@@ -6,7 +6,7 @@ from pymoo.operators.mutation.pm import PolynomialMutation
 from pymoo.operators.crossover.sbx import SBX
 from pymoo.optimize import minimize
 from pymoo.core.problem import ElementwiseProblem
-from concurrent.futures import ProcessPoolExecutor, as_completed
+import multiprocessing
 from scipy.optimize import root
 from pyDOE3 import *
 from itertools import product
@@ -85,12 +85,15 @@ class stack_opt_problem(ElementwiseProblem):
             if status == 0: break 
             else: n_success += 1 
         if status == 1:
-            with ProcessPoolExecutor(max_workers=25) as executor:
-                futures = [
-                    executor.submit(self.compute_shunt_current_batch, idx, filename, x, self.max_F)
-                    for idx in range(len(self.eval_points))
-                ]
-            shunt_rate = [future.result() for future in as_completed(futures)]
+            for i in range(len(self.eval_points)):
+                shunt_rate_ = self.compute_shunt_current_batch(i, filename, x, self.max_F)
+                shunt_rate.append(shunt_rate_)
+            # with ProcessPoolExecutor(max_workers=3) as executor:
+            #     futures = [
+            #         executor.submit(self.compute_shunt_current_batch, idx, filename, x, self.max_F)
+            #         for idx in range(len(self.eval_points))
+            #     ]
+            # shunt_rate = [future.result() for future in as_completed(futures)]
             # objective function
             shunt_rate = np.array(shunt_rate)
             out["F"] = shunt_rate.mean()
@@ -200,9 +203,12 @@ class stack_opt_problem(ElementwiseProblem):
 
 
 if __name__=="__main__":
+    n_proccess = 10
+    pool = multiprocessing.Pool(n_proccess)
+    runner = StarmapParallelization(pool.starmap)
     problem = stack_opt_problem()
-    algorithm = PSO(pop_size=200, sampling=LHS())
-    res = minimize(problem, algorithm, termination=("n_gen", 200), seed=0, verbose=True)
+    algorithm = PSO(pop_size=100, sampling=LHS())
+    res = minimize(problem, algorithm, termination=("n_gen", 3), seed=0, verbose=True)
     print("elapsed time: ", res.exec_time)
     # save results to excel file
     for key, value in zip(problem.parameters.keys(), res.X):
