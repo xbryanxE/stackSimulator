@@ -9,7 +9,6 @@ from pymoo.core.problem import ElementwiseProblem
 import multiprocessing
 from scipy.optimize import root
 from pyDOE3 import *
-from itertools import product
 import json
 import pandas as pd
 import numpy as np
@@ -207,8 +206,10 @@ if __name__=="__main__":
     pool = multiprocessing.Pool(n_proccess)
     runner = StarmapParallelization(pool.starmap)
     problem = stack_opt_problem(elementwise_runner=runner)
+    
     algorithm = PSO(pop_size=200, sampling=LHS())
     res = minimize(problem, algorithm, termination=("n_gen", 300), seed=0, verbose=True, save_history=True)
+
     print("elapsed time: ", res.exec_time)
     # save results to excel file
     for key, value in zip(problem.parameters.keys(), res.X):
@@ -227,4 +228,5 @@ if __name__=="__main__":
         hist_F.append(float(opt.get("F")[0,0]))
 
     history_df = pd.DataFrame({"n_evals": n_evals, "F": hist_F})
+
     history_df.to_csv("internal_optim_params/history_I_50bar.csv", sep=",", index=False)
