@@ -100,7 +100,11 @@ class stack_opt_problem(ElementwiseProblem):
         if out["F"] < self.min_F: 
             self.min_F = out["F"]
             print("shunt rate: ", out["F"])
-    
+            for key, value in zip(self.parameters.keys(), x):
+                self.parameters[key].append(value)
+            df = pd.DataFrame(self.parameters)
+            df.to_csv("internal_optim_params/tmp_optimal_paramters.csv", index=False)
+            
     def starting_parameters(self, Y, x, eval_point):
         H, n_cell = eval_point # (_, m, -)
         nu = self.mu_w / self.rho_w # m^2/s
