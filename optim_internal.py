@@ -101,7 +101,7 @@ class stack_opt_problem(ElementwiseProblem):
             self.min_F = out["F"]
             print("shunt rate: ", out["F"])
             for key, value in zip(self.parameters.keys(), x):
-                self.parameters[key].append(value)
+                self.parameters[key] = [value]
             df = pd.DataFrame(self.parameters)
             df.to_csv("internal_optim_params/tmp_optimal_paramters.csv", index=False)
             
@@ -206,7 +206,7 @@ if __name__=="__main__":
     print("elapsed time: ", res.exec_time)
     # save results to excel file
     for key, value in zip(problem.parameters.keys(), res.X):
-        problem.parameters[key].append(value)
+        problem.parameters[key] = [value]
     df = pd.DataFrame(problem.parameters)
     df.to_csv("internal_optim_params/params_I_5bar.csv", sep=",", index=False)
     # save hystorical
