@@ -20,24 +20,24 @@ class stack_opt_problem(ElementwiseProblem):
     def __init__(self, **kwargs):
         # alpha_tau, alpha_w, alpha_m, alpha_ch, alpha_L, c_ml, c_mk, c_chl, c_chk, c_L, Ref
         self.parameters = {"alpha_tau": [], "alpha_w": [], "alpha_m": [], "alpha_ch": [], "alpha_L": [],
-                           "c_ml": [], "c_mk": [], "c_chl": [], "c_chk": [], "Ref": []}
+                           "c_ml": [], "c_mk": [], "c_chl": [], "c_chk": [], "cL": [], "Ref": []}
         # rho electrolyte
-        self.p_op = 50 * 1e5 # Pa
+        self.p_op = 1.01325 * 1e5 # Pa
         self.rho_w = 1250 # kg/m^3
         self.mu_w = 0.001 # Pa*s
         # limit lengths
         self.w_lims = [2.5e-3, 2e-2] # m
-        self.Dman_lims = [1e-2, 0.15] # m
-        self.Dch_lims = [2e-3, 1.5e-2] # m
-        self.Lch_lims = [4e-3, 0.15] # m
+        self.Dman_lims = [1e-2, 0.45] # m
+        self.Dch_lims = [2e-3, 2e-2] # m
+        self.Lch_lims = [4e-3, 1.2] # m
         self.tau_lims = [80, 350] # s
         # max F
         self.max_F = 1e2
         self.min_F = 1e10 # initial value
         # boundaries
-        xl_ = np.array([-1.5, -1.5, -1.5, -1.5, -1.5, 1., 1., 1., 1., 0.1]) # alpha_tau, alpha_w, alpha_m, alpha_ch, alpha_L, c_ml, c_mk, c_chl, c_chk, c_L, Ref   
-        xu_ = np.array([0., 0., 0., 0., 0., 1.5, 1.5, 1.5, 1.5, 4000]) # alpha_tau, alpha_w, alpha_m, alpha_ch, alpha_L, c_ml, c_mk, c_chl, c_chk, c_L, Ref
-        super().__init__(n_var=10, n_obj=1, xl=xl_, xu=xu_, **kwargs)
+        xl_ = np.array([-1.5, -1.5, -1.5, -1.5, -1.5, 1., 1., 1., 1., 0.3, 0.1]) # alpha_tau, alpha_w, alpha_m, alpha_ch, alpha_L, c_ml, c_mk, c_chl, c_chk, c_L, Ref   
+        xu_ = np.array([0., 0., 0., 0., 0., 1.5, 1.5, 1.5, 1.5, 1., 4000]) # alpha_tau, alpha_w, alpha_m, alpha_ch, alpha_L, c_ml, c_mk, c_chl, c_chk, c_L, Ref
+        super().__init__(n_var=11, n_obj=1, xl=xl_, xu=xu_, **kwargs)
         # filename
         self.path = "templates/"
         # evaluation points
@@ -105,7 +105,7 @@ class stack_opt_problem(ElementwiseProblem):
             for key, value in zip(self.parameters.keys(), x):
                 self.parameters[key] = [value]
             df = pd.DataFrame(self.parameters)
-            df.to_csv("internal_optim_params/tmp_optimal_paramters_50bar.csv", index=False)
+            df.to_csv("external_optim_params/tmp_optimal_paramters.csv", index=False)
             
     def starting_parameters(self, Y, x, eval_point):
         H, n_cell = eval_point # (_, m, -)
@@ -124,19 +124,20 @@ class stack_opt_problem(ElementwiseProblem):
         
     def system_parameters(self, x, eval_point):
         # alpha_tau, alpha_w, alpha_m, alpha_ch, alpha_L, c_ml, c_mk, c_chl, c_chk, c_L, Ref
-        H, n_cell = eval_point # (_, m, -)
-        [am, ach, aL, cml, cmk, cchl, cchk, Rex] = x[2:10]
+        _, n_cell = eval_point # (_, m, -)
+        [am, ach, aL, cml, cmk, cchl, cchk, cL, Rex] = x[2:11]
         Yi = [80, 2.5e-3, 100] # s, m, -
         res = root(self.starting_parameters, Yi, args=(x, eval_point), method="lm")
         tau, w, Re = res.x # residence time and half cell's width
         Dm = (self.Dman_lims[-1] - self.Dman_lims[0]) / (1 + np.exp(n_cell**am * (Re - Rex))) + self.Dman_lims[0] # inlet manifold diameter
         Dch = (self.Dch_lims[-1] - self.Dch_lims[0]) / (1 + np.exp(n_cell**ach * (Re - Rex))) + self.Dch_lims[0] # inlet channel diameter
         Lch = (self.Lch_lims[-1] - self.Lch_lims[0]) / (1 + np.exp(n_cell**aL * (Re - Rex))) + self.Lch_lims[0] # channel length 
+        Lch_out =cL * Lch # outlet channel length
         Dml = cml * Dm # anodic outlet manifold diameter
         Dmk = cmk * Dm # cathodic outlet manifold diameter
         Dchl = cchl * Dch # anodic outlet channel diameter
         Dchk = cchk * Dch # cathodic outlet channel diameter
-        xdim = [Dch, Lch, Dchl, Dchk, Lch, Dm, Dml, Dmk, w]   
+        xdim = [Dch, Lch, Dchl, Dchk, Lch_out, Dm, Dml, Dmk, w]   
         return [xdim, tau, res.success]
     
     def set_system(self, filename, x, eval_point):
@@ -206,16 +207,14 @@ if __name__=="__main__":
     pool = multiprocessing.Pool(n_proccess)
     runner = StarmapParallelization(pool.starmap)
     problem = stack_opt_problem(elementwise_runner=runner)
-    
-    algorithm = PSO(pop_size=200, sampling=LHS())
+    algorithm = PSO(pop_size=100, sampling=LHS())
     res = minimize(problem, algorithm, termination=("n_gen", 300), seed=0, verbose=True, save_history=True)
-
     print("elapsed time: ", res.exec_time)
     # save results to excel file
     for key, value in zip(problem.parameters.keys(), res.X):
         problem.parameters[key] = [value]
     df = pd.DataFrame(problem.parameters)
-    df.to_csv("internal_optim_params/params_I_50bar.csv", sep=",", index=False)
+    df.to_csv("external_optim_params/params_I_1bar.csv", sep=",", index=False)
     # save hystorical
     n_evals = []             # corresponding number of function evaluations
     hist_F = []              # the objective space values in each generation
@@ -228,5 +227,4 @@ if __name__=="__main__":
         hist_F.append(float(opt.get("F")[0,0]))
 
     history_df = pd.DataFrame({"n_evals": n_evals, "F": hist_F})
-
-    history_df.to_csv("internal_optim_params/history_I_50bar.csv", sep=",", index=False)
+    history_df.to_csv("external_optim_params/history_I_1bar.csv", sep=",", index=False)

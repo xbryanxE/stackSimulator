@@ -1,2 +1,7 @@
+run.sh
+error.log
+output.log
 shuntModel/
-internal_optim_params/
+templates/
+__pycache__/
+

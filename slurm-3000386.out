@@ -1,0 +1,6 @@
+/var/spool/slurmd/job3000386/slurm_script: line 11: 0#SBATCH: command not found
+/home/20240400/.conda/envs/fenicsx-env/bin/python
+pymoo              0.6.1.5
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd-tue-computeb001: error: *** JOB 3000386 ON tue-computeb001 CANCELLED AT 2025-06-20T14:46:36 ***
+slurmstepd-tue-computeb001: error: *** STEP 3000386.0 ON tue-computeb001 CANCELLED AT 2025-06-20T14:46:36 ***
