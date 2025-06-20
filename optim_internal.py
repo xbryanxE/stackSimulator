@@ -9,7 +9,6 @@ from pymoo.core.problem import ElementwiseProblem
 import multiprocessing
 from scipy.optimize import root
 from pyDOE3 import *
-from itertools import product
 import json
 import pandas as pd
 import numpy as np
@@ -206,9 +205,9 @@ if __name__=="__main__":
     n_proccess = 10
     pool = multiprocessing.Pool(n_proccess)
     runner = StarmapParallelization(pool.starmap)
-    problem = stack_opt_problem()
+    problem = stack_opt_problem(elementwise_runner=runner)
     algorithm = PSO(pop_size=100, sampling=LHS())
-    res = minimize(problem, algorithm, termination=("n_gen", 3), seed=0, verbose=True)
+    res = minimize(problem, algorithm, termination=("n_gen", 3), seed=0, verbose=True, save_history=True)
     print("elapsed time: ", res.exec_time)
     # save results to excel file
     for key, value in zip(problem.parameters.keys(), res.X):
@@ -216,5 +215,15 @@ if __name__=="__main__":
     df = pd.DataFrame(problem.parameters)
     df.to_csv("internal_optim_params/params_I_5bar.csv", sep=",", index=False)
     # save hystorical
-    history_df = pd.DataFrame(res.history)
+    n_evals = []             # corresponding number of function evaluations
+    hist_F = []              # the objective space values in each generation
+    for algo in res.history:
+        # function evaluations
+        n_evals.append(algo.evaluator.n_eval)
+        
+        # retrieve optimum
+        opt = algo.opt
+        hist_F.append(float(opt.get("F")[0,0]))
+
+    history_df = pd.DataFrame({"n_evals": n_evals, "F": hist_F})
     history_df.to_csv("internal_optim_params/history_I_5bar.csv", sep=",", index=False)
