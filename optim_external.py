@@ -1,6 +1,9 @@
 from pymoo.core.problem import StarmapParallelization
 from pymoo.algorithms.soo.nonconvex.pso import PSO
+<<<<<<< HEAD
 from pymoo.algorithms.soo.nonconvex.ga import GA
+=======
+>>>>>>> 0ed35101e7ec4b7a5516563cda101b2facf5a1e0
 from pymoo.operators.sampling.lhs import LHS
 from pymoo.operators.selection.rnd import RandomSelection
 from pymoo.operators.mutation.pm import PolynomialMutation
@@ -204,6 +207,7 @@ class stack_opt_problem(ElementwiseProblem):
 
 
 if __name__=="__main__":
+<<<<<<< HEAD
     n_proccess = 10
     pool = multiprocessing.Pool(n_proccess)
     runner = StarmapParallelization(pool.starmap)
@@ -213,6 +217,14 @@ if __name__=="__main__":
                     eliminate_duplicates=True, 
                     selection=RandomSelection())
     res = minimize(problem, algorithm, termination=("n_gen", 3), seed=0, verbose=True, save_history=True)
+=======
+    n_proccess = 25
+    pool = multiprocessing.Pool(n_proccess)
+    runner = StarmapParallelization(pool.starmap)
+    problem = stack_opt_problem(elementwise_runner=runner)
+    algorithm = PSO(pop_size=100, sampling=LHS())
+    res = minimize(problem, algorithm, termination=("n_gen", 300), seed=0, verbose=True, save_history=True)
+>>>>>>> 0ed35101e7ec4b7a5516563cda101b2facf5a1e0
     print("elapsed time: ", res.exec_time)
     # save results to excel file
     for key, value in zip(problem.parameters.keys(), res.X):

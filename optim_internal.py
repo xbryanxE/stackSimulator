@@ -22,7 +22,7 @@ class stack_opt_problem(ElementwiseProblem):
         self.parameters = {"alpha_tau": [], "alpha_w": [], "alpha_m": [], "alpha_ch": [], "alpha_L": [],
                            "c_ml": [], "c_mk": [], "c_chl": [], "c_chk": [], "Ref": []}
         # rho electrolyte
-        self.p_op = 5 * 1e5 # Pa
+        self.p_op = 50 * 1e5 # Pa
         self.rho_w = 1250 # kg/m^3
         self.mu_w = 0.001 # Pa*s
         # limit lengths
@@ -105,7 +105,7 @@ class stack_opt_problem(ElementwiseProblem):
             for key, value in zip(self.parameters.keys(), x):
                 self.parameters[key] = [value]
             df = pd.DataFrame(self.parameters)
-            df.to_csv("internal_optim_params/tmp_optimal_paramters.csv", index=False)
+            df.to_csv("internal_optim_params/tmp_optimal_paramters_50bar.csv", index=False)
             
     def starting_parameters(self, Y, x, eval_point):
         H, n_cell = eval_point # (_, m, -)
@@ -202,18 +202,20 @@ class stack_opt_problem(ElementwiseProblem):
 
 
 if __name__=="__main__":
-    n_proccess = 10
+    n_proccess = 25
     pool = multiprocessing.Pool(n_proccess)
     runner = StarmapParallelization(pool.starmap)
     problem = stack_opt_problem(elementwise_runner=runner)
-    algorithm = PSO(pop_size=100, sampling=LHS())
-    res = minimize(problem, algorithm, termination=("n_gen", 3), seed=0, verbose=True, save_history=True)
+    
+    algorithm = PSO(pop_size=200, sampling=LHS())
+    res = minimize(problem, algorithm, termination=("n_gen", 300), seed=0, verbose=True, save_history=True)
+
     print("elapsed time: ", res.exec_time)
     # save results to excel file
     for key, value in zip(problem.parameters.keys(), res.X):
         problem.parameters[key] = [value]
     df = pd.DataFrame(problem.parameters)
-    df.to_csv("internal_optim_params/params_I_5bar.csv", sep=",", index=False)
+    df.to_csv("internal_optim_params/params_I_50bar.csv", sep=",", index=False)
     # save hystorical
     n_evals = []             # corresponding number of function evaluations
     hist_F = []              # the objective space values in each generation
@@ -226,4 +228,5 @@ if __name__=="__main__":
         hist_F.append(float(opt.get("F")[0,0]))
 
     history_df = pd.DataFrame({"n_evals": n_evals, "F": hist_F})
-    history_df.to_csv("internal_optim_params/history_I_5bar.csv", sep=",", index=False)
+
+    history_df.to_csv("internal_optim_params/history_I_50bar.csv", sep=",", index=False)
