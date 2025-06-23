@@ -37,7 +37,7 @@ class stack_opt_problem(ElementwiseProblem):
         # boundaries
         xl_ = np.array([80, 5e-2, 6e-3, 0.5, 0.3, 3e-2, 1e-1]) # tau, Dm_in, Dch_in, Lch_in, Dch_L, Dch_k, Dm_L, Dm_k 
         xu_ = np.array([400, 2e-1, 1.2e-2, 2., 1., 4e-2, 4e-1]) # tau, Dm_in, Dch_in, Lch_in, Dch_L, Dch_k, Dm_L, Dm_k
-        super().__init__(n_var=7, n_obj=2, xl=xl_, xu=xu_, **kwargs)
+        super().__init__(n_var=7, n_obj=2, n_ieq_constr=4, xl=xl_, xu=xu_, **kwargs)
         # filename
         self.path = "templates/"
             
@@ -57,14 +57,12 @@ class stack_opt_problem(ElementwiseProblem):
     def _evaluate(self, x, out, *args, **kwargs):
         filename = "optim_four_manifolds.json"
         out["F"] = self.compute_shunt_current_batch(filename, x)
-        # print and store local best solution 
-        if out["F"][0] < self.min_F and out["F"][-1] < 5: 
-            self.min_F = out["F"][0]
-            print("shunt rate: ", out["F"][0], " %")
-            for key, value in zip(self.parameters.keys(), x):
-                self.parameters[key] = [value]
-            df = pd.DataFrame(self.parameters)
-            df.to_csv("external_optim_params/tmp_optimal_paramters.csv", index=False)  
+        # constraints
+        G1 = out["F"][-1] - 5 # cta pressure difference lower than 5 mbar
+        G2 = x[1] - x[-1] # inlet manifold diameter smaller than the outlet manifold diameter
+        G3 = x[2] - x[-2] # inlet channel diameter smaller than the outlet channel diameter
+        G4 = x[-3] - x[3] # outlet channels length smaller than the inlet channels length
+        out["G"] = np.array([G1, G2, G3, G4])  
     
     def set_system(self, filename, x):
         n_cell = self.N # number of cells

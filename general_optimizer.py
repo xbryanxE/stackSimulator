@@ -17,22 +17,21 @@ def map_optimization(problem, p_vals, H_vals):
         for H_ in H_vals:
             problem.p_op = p_ # Pa
             problem.H = H_ # m
-            algorithm = NSGA2(pop_size=100, sampling=LHS())
-            res = minimize(problem, algorithm, termination=("n_gen", 500), seed=0, verbose=True, save_history=True) 
+            algorithm = NSGA2(pop_size=50, sampling=LHS())
+            res = minimize(problem, algorithm, termination=("n_gen", 100), seed=0, verbose=True, save_history=True) 
             print("elapsed time: ", res.exec_time)
-            z = np.where(res.F[0,:] < 5)
-            zz = np.where(res.F[:,0] == min(res.F[:,0]))
-            F = res.F[zz]
-            X = res.X[zz]
+            z = np.where(res.F[:,0] == min(res.F[:,0]))
+            F = res.F[z]
+            X = res.X[z]
             for key, value in zip(out_dict.keys(), np.concatenate([F[0], [p_], [H_], X[0]])):
                 out_dict[key].append(value)
     return out_dict
 
 # internal manifolds with separate inlets
-p_vals = np.array([5, 15, 30, 50]) * 1e5 # Pa
-H_vals = np.array([0.7, 1., 1.3, 1.6]) # m
+p_vals = np.array([5, 50]) * 1e5 # Pa
+H_vals = np.array([0.7, 1.6]) # m
 # parallelization scheme
-n_process = 40
+n_process = 50
 pool = multiprocessing.Pool(n_process)
 runner = StarmapParallelization(pool.starmap)
 problem = sop(elementwise_runner=runner)
