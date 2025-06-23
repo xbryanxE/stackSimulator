@@ -18,7 +18,7 @@ def map_optimization(problem, p_vals, H_vals):
             problem.p_op = p_ # Pa
             problem.H = H_ # m
             algorithm = NSGA2(pop_size=100, sampling=LHS())
-            res = minimize(problem, algorithm, termination=("n_gen", 300), seed=0, verbose=True, save_history=True) 
+            res = minimize(problem, algorithm, termination=("n_gen", 500), seed=0, verbose=True, save_history=True) 
             print("elapsed time: ", res.exec_time)
             z = np.where(res.F[0,:] < 5)
             zz = np.where(res.F[:,0] == min(res.F[:,0]))
@@ -32,7 +32,7 @@ def map_optimization(problem, p_vals, H_vals):
 p_vals = np.array([5, 15, 30, 50]) * 1e5 # Pa
 H_vals = np.array([0.7, 1., 1.3, 1.6]) # m
 # parallelization scheme
-n_process = 50
+n_process = 40
 pool = multiprocessing.Pool(n_process)
 runner = StarmapParallelization(pool.starmap)
 problem = sop(elementwise_runner=runner)
